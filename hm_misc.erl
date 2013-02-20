@@ -5,6 +5,7 @@
 -export([to_tuplelist/2,to_record/3,to_match_record/3]).
 -export([ensure_started/1,set_env/3,get_env/2,get_env/3]).
 -export([to_hex/1,to_digit/1,boolean_to_number/1]).
+-export([to_iolist/1]).
 
 %% Tow functions to deal with pid monitor and demonitor in ets table
 monitor(Pid,PidGroup) ->
@@ -105,5 +106,11 @@ boolean_to_number(false) ->
 boolean_to_number(undefined) ->
     0.
 
+to_iolist(Item) when is_atom(Item)->
+  erlang:atom_to_binary(Item,utf8);
+to_iolist(Item) when is_list(Item)->
+  unicode:characters_to_binary(Item,utf8);
+to_iolist(Item)->
+  erlang:term_to_binary(Item).
 
 
