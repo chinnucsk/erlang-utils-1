@@ -106,10 +106,14 @@ boolean_to_number(false) ->
 boolean_to_number(undefined) ->
     0.
 
+to_iolist(Item) when is_binary(Item)->
+  Item;
 to_iolist(Item) when is_atom(Item)->
   erlang:atom_to_binary(Item,utf8);
 to_iolist(Item) when is_list(Item)->
   unicode:characters_to_binary(Item,utf8);
+to_iolist(Item) when is_integer(Item)->
+  erlang:integer_to_list(Item);
 to_iolist(Item)->
   erlang:term_to_binary(Item).
 
