@@ -4,8 +4,8 @@
 -export([monitor/2,demonitor/2]).
 -export([to_tuplelist/2,to_record/3,to_match_record/3]).
 -export([ensure_started/1,set_env/3,get_env/2,get_env/3]).
--export([to_hex/1,to_digit/1,boolean_to_number/1]).
--export([to_iolist/1]).
+-export([to_hex/1,to_digit/1,boolean_to_number/1,to_iolist/1]).
+-export([first_in_list/1,nth_in_list/2]).
 
 %% Tow functions to deal with pid monitor and demonitor in ets table
 monitor(Pid,PidGroup) ->
@@ -117,4 +117,14 @@ to_iolist(Item) when is_integer(Item)->
 to_iolist(Item)->
   erlang:term_to_binary(Item).
 
+%%judge tools
+first_in_list(List)->
+    nth_in_list(1,List).
+
+nth_in_list(N,[])->
+    undefined;
+nth_in_list(1,[H|_])->
+    H;
+nth_in_list(N,[_|T])->
+    nth_in_list(N-1,T).
 
