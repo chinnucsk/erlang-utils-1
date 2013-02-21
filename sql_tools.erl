@@ -125,42 +125,75 @@ escape($")  -> "\\\"";
 escape($\\) -> "\\\\";
 escape(C)   -> C.
 
-encode(Val) ->
-    encode(Val, false).
 
-encode(Val, false) when Val == undefined; Val == null ->
-    "NULL";
-encode(Val, true) when Val == undefined; Val == null ->
-    <<"NULL">>;
-encode(Val, false) when is_binary(Val) ->
-    binary_to_list(quote(Val));
-encode(Val, true) when is_binary(Val) ->
-    quote(Val);
-encode(Val, true) ->
-    list_to_binary(encode(Val,false));
-encode(Val, false) when is_atom(Val) ->
-    quote(atom_to_list(Val));
-encode(Val, false) when is_list(Val) ->
-    quote(Val);
-encode(Val, false) when is_integer(Val) ->
-    integer_to_list(Val);
-encode(Val, false) when is_float(Val) ->
-    [Res] = io_lib:format("~w", [Val]),
-    Res;
-encode({datetime, Val}, AsBinary) ->
-    encode(Val, AsBinary);
-encode({{Year, Month, Day}, {Hour, Minute, Second}}, false) ->
-    Res = two_digits([Year, Month, Day, Hour, Minute, Second]),
-    lists:flatten(Res);
-encode({TimeType, Val}, AsBinary)
-  when TimeType == 'date';
-       TimeType == 'time' ->
-    encode(Val, AsBinary);
-encode({Time1, Time2, Time3}, false) ->
-    Res = two_digits([Time1, Time2, Time3]),
-    lists:flatten(Res);
-encode(Val, _AsBinary) ->
-    {error, {unrecognized_value, Val}}.
+encode(Val) ->
+    encode(Val, list).
+
+encode(Val, ReturnType) when is_atom(Val)->
+	encode(atom_to_list(Val), ReturnType, latin1);
+encode(Val,ReturnType)->
+	encode(Val, ReturnType, utf8).
+
+encode(null, list, _)-> 
+	"NULL";
+encode(undefined, list, _)-> 
+	"NULL";
+encode(null, binary, _)->
+	<<"NULL">>;
+encode(undefined, binary, _)->
+	<<"NULL">>;
+
+encode(Val, list, latin1) when is_binary(Val) ->
+	quote(binary_to_list(Val));
+encode(Val, list, Encoding) when is_binary(Val) ->
+	quote(unicode:characters_to_list(Val, Encoding));
+encode(Val, list, _) when is_list(Val) ->
+	quote(Val);
+encode(Val, list, _) when is_integer(Val) ->
+	integer_to_list(Val);
+encode(Val, list, _) when is_float(Val) ->
+	[Res] = io_lib:format("~w", [Val]),
+	Res;
+
+encode(Val, binary, latin1) when is_list(Val) -> 
+	list_to_binary(quote(Val));
+encode(Val, binary, Encoding) when is_list(Val) ->
+	unicode:characters_to_binary(quote(Val), Encoding, Encoding);
+encode(Val, binary, latin1) when is_binary(Val) ->
+	quote(Val, latin1);
+encode(Val, binary, Encoding) when is_binary(Val) ->
+	quote(Val, Encoding);
+encode(Val, binary, _) when is_integer(Val) ->
+	list_to_binary(integer_to_list(Val));
+encode(Val, binary, _) when is_float(Val) ->
+	[Res] = io_lib:format("~w", [Val]),
+	erlang:list_to_binary(Res);
+
+encode({datetime, Val}, ReturnType, Encoding) ->
+	encode(Val, ReturnType, Encoding);
+
+encode({date, Val}, ReturnType, Encoding) ->
+	encode(Val, ReturnType, Encoding);
+
+encode({time, Val}, ReturnType, Encoding) ->
+	encode(Val, ReturnType, Encoding);
+
+encode({{Year, Month, Day}, {Hour, Minute, Second}}, list, _) ->
+	Res = two_digits([Year, Month, Day, Hour, Minute, Second]),
+	lists:flatten(Res);
+
+encode({{_Year, _Month, _Day}, {_Hour, _Minute, _Second}}=Val, binary, E) ->
+	list_to_binary(encode(Val, list, E));
+
+encode({Time1, Time2, Time3}, list, _) ->
+	Res = two_digits([Time1, Time2, Time3]),
+	lists:flatten(Res);
+
+encode({_Time1, _Time2, _Time3}=Val, binary, E) ->
+	list_to_binary(encode(Val, list, E));
+
+encode(Val, _, _) ->
+	{error, {unrecognized_value, Val}}.
 
 two_digits(Nums) when is_list(Nums) ->
     [two_digits(Num) || Num <- Nums];
@@ -186,6 +219,8 @@ quote(Bin, latin1) when is_binary(Bin) ->
 quote(Bin, Encoding) when is_binary(Bin) ->
 	case unicode:characters_to_list(Bin,Encoding) of
 		{error,E1,E2} -> 
+			exit({invalid_encoding_binary, E1, E2});
+		{incomplete,E1,E2} ->
 			exit({invalid_encoding_binary, E1, E2});
 	    List ->
 			unicode:characters_to_binary(quote(List),Encoding,Encoding)    	

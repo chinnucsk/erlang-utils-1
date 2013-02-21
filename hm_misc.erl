@@ -9,7 +9,7 @@
 -export([to_hex/1,to_digit/1,boolean_to_number/1,to_iolist/1]).
 -export([first_in_list/1,nth_in_list/2]).
 -export([get_integer/3,get_string/3]).
--export([list_to_binary/1,list_to_binary/2,binary_to_list/1]).
+-export([list_to_binary/1,binary_to_list/1]).
 
 %% Tow functions to deal with pid monitor and demonitor in ets table
 monitor(Pid,PidGroup) ->
@@ -186,12 +186,4 @@ list_to_binary(L) when is_list(L) ->
       end
   end.
 
-list_to_binary(L,_) when is_binary(L) ->
-  L;
-
-list_to_binary(L,latin1) when is_list(L) ->
-  erlang:list_to_binary(L);
-
-list_to_binary(L,Encoding) when is_list(L) ->
-  unicode:characters_to_binary(L,Encoding,Encoding).
 
