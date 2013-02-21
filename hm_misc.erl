@@ -1,12 +1,15 @@
 %%-*- coding:utf-8 -*-
 -module(hm_misc).
 
+%%-compile({no_auto_import,[binary_to_list/1,list_to_binary/1]}).
+
 -export([monitor/2,demonitor/2]).
 -export([to_tuplelist/2,to_record/3,to_match_record/3]).
 -export([ensure_started/1,set_env/3,get_env/2,get_env/3]).
 -export([to_hex/1,to_digit/1,boolean_to_number/1,to_iolist/1]).
 -export([first_in_list/1,nth_in_list/2]).
 -export([get_integer/3,get_string/3]).
+-export([list_to_binary/1,list_to_binary/2,binary_to_list/1]).
 
 %% Tow functions to deal with pid monitor and demonitor in ets table
 monitor(Pid,PidGroup) ->
@@ -91,7 +94,7 @@ set_env(AppName,Par,Val)->
 to_hex([]) ->
     [];
 to_hex(Bin) when is_binary(Bin) -> 
-    to_hex(binary_to_list(Bin));
+    to_hex(erlang:binary_to_list(Bin));
 to_hex([H|T]) ->
     [to_digit(H div 16), to_digit(H rem 16) | to_hex(T)].
 
@@ -112,7 +115,7 @@ to_iolist(Item) when is_binary(Item)->
 to_iolist(Item) when is_atom(Item)->
   erlang:atom_to_binary(Item,utf8);
 to_iolist(Item) when is_list(Item)->
-  unicode:characters_to_binary(Item,utf8);
+  hm_misc:list_to_binary(Item);
 to_iolist(Item) when is_integer(Item)->
   List = erlang:integer_to_list(Item),
   erlang:list_to_binary(List);
@@ -158,4 +161,37 @@ get_string(Key,TupleList,Default) ->
          _->
 	   unicode:characters_to_list(Value,utf8)
     end.
+
+binary_to_list(Bin) when is_binary(Bin) ->
+    case unicode:characters_to_binary(Bin,utf8,utf8) of
+      Bin -> 
+        unicode:characters_to_list(Bin);
+      _ ->
+        erlang:binary_to_list(Bin)
+    end.
+
+list_to_binary(L) when is_binary(L) ->
+  L;
+
+list_to_binary(L) when is_list(L) ->
+  case unicode:characters_to_binary(L) of
+      {error,_,_} -> 
+        erlang:list_to_binary(L);
+      B ->
+         case unicode:characters_to_list(B,utf8) of
+            L -> 
+              B;
+            _ -> 
+              erlang:list_to_binary(L)
+      end
+  end.
+
+list_to_binary(L,_) when is_binary(L) ->
+  L;
+
+list_to_binary(L,latin1) when is_list(L) ->
+  erlang:list_to_binary(L);
+
+list_to_binary(L,Encoding) when is_list(L) ->
+  unicode:characters_to_binary(L,Encoding,Encoding).
 
