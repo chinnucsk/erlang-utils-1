@@ -16,54 +16,61 @@ encode_select({Tab, Where}) when is_atom(Tab) and is_tuple(Where) ->
 	encode_select({Tab, ['*'], Where});
 
 encode_select({Tab, Fields, undefined}) when is_atom(Tab) and is_list(Fields) ->
-	["SELECT ", encode_fields(Fields), " FROM ", atom_to_list(Tab), ";"];
+	List = ["SELECT ", encode_fields(Fields), " FROM ", atom_to_list(Tab), ";"],
+	lists:concat(List);
 
 encode_select({Tab, Fields, Where}) when is_atom(Tab) 
 	and is_list(Fields) and is_tuple(Where) ->
-	["SELECT ", encode_fields(Fields), " FROM ",
-	 atom_to_list(Tab), " WHERE ", encode_where(Where), ";"].
+	List = ["SELECT ", encode_fields(Fields), " FROM ",
+	 atom_to_list(Tab), " WHERE ", encode_where(Where), ";"],
+	lists:concat(List).
 
 
 encode_insert(Tab, Record) ->
 	{Fields, Values} = lists:unzip([{atom_to_list(F), encode(V)} 
 		|| {F, V} <- Record]),
-	["INSERT INTO ", atom_to_list(Tab), " (",
+	List = ["INSERT INTO ", atom_to_list(Tab), " (",
 		 string:join(Fields, ","), ") VALUES (",
-		 string:join(Values, ","), ");"].
+		 string:join(Values, ","), ");"],
+	lists:concat(List).
 
 encode_insert(Tab, Fields, Rows) ->
-
 	Rows1 = [ encode(Row) || Row <- Rows],
-
-	["INSERT INTO ", atom_to_list(Tab), " (",
+	List = ["INSERT INTO ", atom_to_list(Tab), " (",
 		string:join([atom_to_list(F) || F <- Fields], ","), 
-		") VALUES (", string:join(Rows1, ","), ");"].
+		") VALUES (", string:join(Rows1, ","), ");"],
+	lists:concat(List).
 
 
 encode_update(Tab, Record) when is_atom(Tab) and is_list(Record) ->
 	case proplists:get_value(id, Record) of 
     	undefined ->
 			Updates = string:join([encode_column(Col) || Col <- Record], ","),
-			["UPDATE ", atom_to_list(Tab), " SET ", Updates, ";"];
+			List = ["UPDATE ", atom_to_list(Tab), " SET ", Updates, ";"],
+			lists:concat(List);
     	Id ->
         	encode_update(Tab, lists:keydelete(id, 1, Record), {id, Id})
 	end.
 
 encode_update(Tab, Record, Where) ->
 	Update = string:join([encode_column(Col) || Col <- Record], ","),
-    ["UPDATE ", atom_to_list(Tab), " SET ", Update,
-		" WHERE ", encode_where(Where), ";"].
+    List = ["UPDATE ", atom_to_list(Tab), " SET ", Update,
+		" WHERE ", encode_where(Where), ";"],
+	lists:concat(List).
 
 encode_delete(Tab) when is_atom(Tab) ->
-	["DELETE FROM ", atom_to_list(Tab), ";"].
+	List = ["DELETE FROM ", atom_to_list(Tab), ";"],
+	lists:concat(List).
 
 encode_delete(Tab, Id) when is_atom(Tab)and is_integer(Id) ->
-    ["DELETE FROM ", atom_to_list(Tab), 
-			 " WHERE ", encode_where({id, Id})];
+    List = ["DELETE FROM ", atom_to_list(Tab), 
+			 " WHERE ", encode_where({id, Id})],
+	lists:concat(List);
 
 encode_delete(Tab, Where) when is_atom(Tab) and is_tuple(Where) ->
-    ["DELETE FROM ", atom_to_list(Tab),
-			 " WHERE ", encode_where(Where)].
+    List = ["DELETE FROM ", atom_to_list(Tab),
+			 " WHERE ", encode_where(Where)],
+	lists:concat(List).
 
 
 encode_fields(Fields) ->
