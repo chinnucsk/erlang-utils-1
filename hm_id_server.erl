@@ -21,7 +21,7 @@
 -export([start_link/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
                             terminate/2, code_change/3]).
--export ([gen_id/1]).
+-export ([gen_id/0,gen_id/1]).
 
 -record(state,{partition,
                sequence = 0,
@@ -30,15 +30,20 @@
 gen_id(Indentify)->
     gen_server:call(Indentify,next_id).
 
+gen_id()->
+    gen_server:call(?MODULE,next_id).
+
 start_link(Args)->
     Name = proplists:get_value(server_name,Args),
     PartitionInteger = proplists:get_value(partition,Args,0),
     Partition = <<PartitionInteger:10>>,
     case  Name of
-        undefined ->
+        pid ->
             gen_server:start_link(?MODULE,Partition,[]);
+        Name when erlang:is_tuple(Name) ->
+            gen_server:start_link(Name,?MODULE,Partition,[]);
         _->
-            gen_server:start_link(Name,?MODULE,Partition,[])
+            gen_server:start_link({local,?MODULE},Partition,[])
     end.
 
 init(Args)->
