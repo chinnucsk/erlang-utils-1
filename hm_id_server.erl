@@ -43,7 +43,7 @@ start_link(Args)->
         Name when erlang:is_tuple(Name) ->
             gen_server:start_link(Name,?MODULE,Partition,[]);
         _->
-            gen_server:start_link({local,?MODULE},Partition,[])
+            gen_server:start_link({local,?MODULE},?MODULE,Partition,[])
     end.
 
 init(Args)->
