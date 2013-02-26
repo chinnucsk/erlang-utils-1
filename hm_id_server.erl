@@ -22,6 +22,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
                             terminate/2, code_change/3]).
 -export ([gen_id/0,gen_id/1]).
+-define (EPOCH,1356998400974295).%2013-1-1 0:0:0 {1356,998400,974295}
 
 -record(state,{partition,
                sequence = 0,
@@ -47,7 +48,7 @@ start_link(Args)->
     end.
 
 init(Args)->
-    TS = erlang:now(),
+    TS = timestamp(),
     {ok,#state{partition = Args,sequence = 0,last_timestamp = TS}}.
 
 handle_call(next_id, From, #state{last_timestamp = TS, sequence = Seq, partition = Partition} = State) ->
@@ -77,8 +78,17 @@ terminate(_Reason, _State) ->
 code_change(_Old, State, _Extra) ->
     {ok, State}.
 
+timestamp()->
+   Now = hm_date:time_micro(),
+   DiffMicro = Now - ?EPOCH,
+   NowMicros = DiffMicro rem 1000000,
+   DiffSec = DiffMicro div 1000000,
+   NowSecs = DiffSec rem 1000000,
+   NowMegas = DiffSec div 1000000,
+   {NowMegas,NowSecs,NowMicros}.
+
 get_next_seq({Megas, Secs, Micros} = Time, Seq) ->
-    Now = erlang:now(),
+    Now = timestamp(),
     {NowMegas, NowSecs, NowMicros} = Now,
     if
         % Time is essentially equal at the millisecond
