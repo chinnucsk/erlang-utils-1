@@ -69,12 +69,12 @@ app_name_version(Module)->
       BaseDir = get_base_dir(Module),
       BaseName = filename:basename(BaseDir),
       LastMinusPos = string:rchr(BaseName,$-),
-      legal_separator(LastMinusPos,BaseName).
+      separator(LastMinusPos,BaseName).
 
--spec legal_separator(integer(),string())-> {string(),string()} | error.
-legal_separator(0,_BaseName)->
+-spec separator(integer(),string())-> {string(),string()} | error.
+separator(0,_BaseName)->
 	error;
-legal_separator(Pos,BaseName)->
+separator(Pos,BaseName)->
       AppName = string:substr(BaseName,1,Pos - 1),
       AppVsn = string:substr(BaseName,Pos + 1),
       {AppName,AppVsn}.
