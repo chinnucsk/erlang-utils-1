@@ -1,5 +1,6 @@
 -module(hm_string).
 -export([to_hex/1]).
+
 to_hex([]) ->
     [];
 to_hex(Bin) when is_binary(Bin) -> 

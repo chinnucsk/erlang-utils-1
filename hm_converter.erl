@@ -1,6 +1,7 @@
 -module(hm_converter).
 -export([bianry_to_list/1,list_to_binary/1]).
 -export([bool_to_number/1,term_to_iolist/1]).
+
 binary_to_list(Bin) when is_binary(Bin) ->
     case unicode:characters_to_binary(Bin,utf8,utf8) of
       Bin -> 

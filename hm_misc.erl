@@ -1,7 +1,6 @@
 %%-*- coding:utf-8 -*-
 -module(hm_misc).
 
-%%-compile({no_auto_import,[binary_to_list/1,list_to_binary/1]}).
 
 -export([monitor/2,demonitor/2]).
 -export([to_tuplelist/2,to_record/3,to_match_record/3]).
@@ -87,10 +86,7 @@ get_env(AppName,Par,DefVal) ->
 set_env(AppName,Par,Val)->
     application:set_env(AppName,Par,Val).
 
-%% String tools
-
-%%judge tools
-
+%% a list tool 
 first_in_list(List)->
     nth_in_list(1,List).
 nth_in_list(_N,[])->
