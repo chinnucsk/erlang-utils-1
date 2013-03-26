@@ -39,7 +39,7 @@ term_to_iolist(Item) when is_binary(Item)->
 term_to_iolist(Item) when is_atom(Item)->
   erlang:atom_to_binary(Item,utf8);
 term_to_iolist(Item) when is_list(Item)->
-  hm_misc:list_to_binary(Item);
+  hm_converter:list_to_binary(Item);
 term_to_iolist(Item) when is_integer(Item)->
   List = erlang:integer_to_list(Item),
   erlang:list_to_binary(List);
