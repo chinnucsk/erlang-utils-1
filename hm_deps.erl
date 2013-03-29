@@ -17,6 +17,7 @@ deps_on_path() ->
                         Acc
                 end
         end,
+    
     ordsets:from_list(lists:foldl(F, [], code:get_path())).
     
 -spec new_siblings(module()) -> [term()].
