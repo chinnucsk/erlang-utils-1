@@ -1,6 +1,7 @@
 -module(hm_converter).
--export([bianry_to_list/1,list_to_binary/1]).
+-export([binary_to_list/1,list_to_binary/1]).
 -export([bool_to_number/1,term_to_iolist/1]).
+
 binary_to_list(Bin) when is_binary(Bin) ->
     case unicode:characters_to_binary(Bin,utf8,utf8) of
       Bin -> 
@@ -38,7 +39,7 @@ term_to_iolist(Item) when is_binary(Item)->
 term_to_iolist(Item) when is_atom(Item)->
   erlang:atom_to_binary(Item,utf8);
 term_to_iolist(Item) when is_list(Item)->
-  hm_misc:list_to_binary(Item);
+  hm_converter:list_to_binary(Item);
 term_to_iolist(Item) when is_integer(Item)->
   List = erlang:integer_to_list(Item),
   erlang:list_to_binary(List);
