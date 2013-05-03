@@ -1,7 +1,6 @@
 -module(hm_math).
 -export([int32/1,int64/1]).
 -export([floor/1,ceil/1]).
-
 int32(Num) -> 
     N1 = Num band 16#FFFFFFFF, 
     case N1 =< 16#7FFFFFFF of
