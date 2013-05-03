@@ -44,35 +44,3 @@ term_to_iolist(Item) when is_integer(Item)->
   erlang:list_to_binary(List);
 term_to_iolist(Item)->
   erlang:term_to_binary(Item).
-
-digits_to_list(0, Digits) ->
-	digits_to_list(Digits, ignore, ".0");
-digits_to_list(digits_to_list(Dpoint, Digits) when Dpoint =< length(Digits),
-												   Dpoint > 0 ->
-    digits_to_list(Digits, Dpoint, []);
-digits_to_list(Dpoint, Digits) when Dpoint > 0 ->
-    Pad = Dpoint - length(Digits),
-    case Pad of
-        X when X > 6 -> 
-            digits_to_list(Digits, 1, []) ++ "e" ++ integer_to_list(Dpoint - 1);
-		_ -> 
-            digits_to_list(Digits ++ [ 0 || _ <- lists:seq(1, Pad)], Dpoint, [])
-    end;
-digits_to_list(Dpoint, Digits) when Dpoint < 0 ->
-    digits_to_list(Digits, 1, []) ++ "e" ++ integer_to_list(Dpoint - 1).
-
-digits_to_list([], 0, Acc) ->
-    lists:reverse("0." ++ Acc);
-digits_to_list([], ignore, Acc) ->
-    lists:reverse(Acc);
-digits_to_list(Digits, 0, Acc) ->
-    digits_to_list(Digits, ignore, "." ++ Acc); 
-digits_to_list([Digit|Digits], Dpoint, Acc) ->
-	NewDpoint = case Dpoint of
-					ignore -> 
-						ignore;
-					X -> 
-						X - 1
-				end,
-	NewAcc = hm_string:to_ascii(Digit) ++ Acc
-    digits_to_list(Digits,NewDpoint,NewAcc).

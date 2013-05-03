@@ -4,7 +4,7 @@
 -spec uuid_random() -> binary().
 uuid_random() ->
     Random = crypto:rand_bytes(16),
-    UUID = hm_string:to_hex(Random),
+    UUID = hm_string:integers_to_hex(Random),
     list_to_binary(UUID).
 
 -spec uuid_utc() -> binary().
@@ -12,6 +12,6 @@ uuid_utc() ->
     Now = hm_date:time_micro(),
     Prefix = io_lib:format("~14.16.0b", [Now]),
     Random = crypto:rand_bytes(9),
-    Hex = hm_string:to_hex(Random),
+    Hex = hm_string:integers_to_hex(Random),
     list_to_binary(Prefix ++ Hex).
 
