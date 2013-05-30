@@ -1,6 +1,25 @@
 -module(hm_string).
--export([digit_to_ascii/1]).
--export([integers_to_hex/1,digits_to_float/2]).
+-export([digit_to_ascii/1,ascii_to_digit/1]).
+-export([integers_to_hex/1,digits_to_float/2,hex_to_integers/1]).
+
+hex_to_integers([])->
+	[];
+hex_to_integers(Bin) when erlang:is_binary(Bin) ->
+	hex_to_integers(erlang:binary_to_list(Bin));
+hex_to_integers(List) when erlang:is_list(List) ->
+	hex_to_integers(lists:reverse(List),[],[]).
+hex_to_integers([],[],Acc)->
+	Acc;
+hex_to_integers([],[Low],Acc)->
+	hex_to_integers([],[],[Low|Acc]);
+hex_to_integers([H|T],[],Acc)->
+	Low = ascii_to_digit(H),
+	hex_to_integers(T,[Low],Acc);
+hex_to_integers([H|T],[Low],Acc) ->
+	High = ascii_to_digit(H),
+	Integer = (High bsl 4) + Low,
+	Acc2 = [Integer|Acc],
+	hex_to_integers(T,[],Acc2).
 
 integers_to_hex([]) ->
     [];
@@ -17,6 +36,17 @@ integers_to_hex([H|T],Acc)->
 	Acc1 = [High | Acc],
 	Acc2 = [Low | Acc1],
 	integers_to_hex(T,Acc2).
+
+ascii_to_digit(I) when I >= 97 ->
+	io:format("a:~p~n",[I]),
+	I - $a + 10;
+ascii_to_digit(I) when  I < 65->
+	io:format("n:~p~n",[I]),
+	I - $0;
+ascii_to_digit(I) ->
+	io:format("A:~p~n",[I]),
+	I - $A + 10.
+	
 
 digit_to_ascii(N) when N < 10 ->
     $0 + N;
